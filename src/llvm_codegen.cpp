@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <string_view>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -84,6 +85,30 @@ std::string readFile(const std::filesystem::path& path)
     std::ostringstream buffer;
     buffer << in.rdbuf();
     return buffer.str();
+}
+
+std::string trimLeft(std::string_view text)
+{
+    std::size_t pos = 0;
+    while (pos < text.size() && (text[pos] == ' ' || text[pos] == '\t' || text[pos] == '\r')) {
+        ++pos;
+    }
+    return std::string(text.substr(pos));
+}
+
+std::string sanitizeAssembly(const std::string& assembly)
+{
+    std::istringstream in(assembly);
+    std::ostringstream out;
+    std::string line;
+    while (std::getline(in, line)) {
+        const std::string trimmed = trimLeft(line);
+        if (trimmed.starts_with(".attribute") || trimmed.starts_with(".addrsig")) {
+            continue;
+        }
+        out << line << '\n';
+    }
+    return out.str();
 }
 
 void writeFile(const std::filesystem::path& path, const std::string& text)
@@ -699,7 +724,7 @@ std::string compileIRToAssembly(const std::string& ir, bool optimize)
         throw std::runtime_error("LLVM clang failed while generating RISC-V assembly\n" + errors);
     }
 
-    return readFile(temp.assembly);
+    return sanitizeAssembly(readFile(temp.assembly));
 }
 
 } // namespace
