@@ -1,0 +1,14 @@
+int trap() {
+    return 1 / 0;
+}
+
+int main() {
+    int x = 0;
+    if (x != 0 && trap()) {
+        return 1;
+    }
+    if (x == 0 || trap()) {
+        return 7;
+    }
+    return 2;
+}
