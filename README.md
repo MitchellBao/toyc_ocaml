@@ -9,13 +9,13 @@ existing ToyC C++ implementation and an LLVM-based RISC-V32 backend.
 mingw32-make
 ```
 
-The build produces `compiler.exe`.
+The build produces `compiler` on Linux and `compiler.exe` on Windows.
 
 ## Run
 
 ```sh
-compiler.exe < input.tc > output.s
-compiler.exe -opt < input.tc > output.s
+./compiler < input.tc > output.s
+./compiler -opt < input.tc > output.s
 ```
 
 The compiler reads ToyC source code from standard input and writes RISC-V32
@@ -25,9 +25,8 @@ LLVM IR before assembly emission.
 ## LLVM Tool
 
 The backend invokes LLVM clang as the RISC-V code generator. It first checks the
-`TOYC_CLANG` environment variable, then falls back to:
+`TOYC_CLANG` environment variable, then falls back to `clang` on Linux and:
 
 ```text
 C:\Program Files\LLVM\bin\clang.exe
 ```
-

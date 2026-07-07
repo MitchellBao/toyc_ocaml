@@ -56,11 +56,15 @@ std::filesystem::path findClang()
         }
     }
 
+#ifdef _WIN32
     const std::filesystem::path bundled = "C:/Program Files/LLVM/bin/clang.exe";
     if (std::filesystem::exists(bundled)) {
         return bundled;
     }
     return "clang.exe";
+#else
+    return "clang";
+#endif
 }
 
 std::filesystem::path tempPath(const std::string& suffix)
@@ -668,14 +672,23 @@ std::string compileIRToAssembly(const std::string& ir, bool optimize)
 
     const std::filesystem::path clang = findClang();
     std::ostringstream command;
-    command << "cmd /C \""
-            << quotePath(clang)
-            << " --target=riscv32-unknown-elf -march=rv32im -mabi=ilp32 -x ir -S "
+#ifdef _WIN32
+    command << "cmd /C \"\""
+            << clang.string()
+            << "\" --target=riscv32-unknown-elf -march=rv32im -mabi=ilp32 -x ir -S "
             << (optimize ? "-O2" : "-O0")
             << " -o " << quotePath(temp.assembly)
             << ' ' << quotePath(temp.ir)
             << " 2> " << quotePath(temp.errors)
             << '"';
+#else
+    command << quotePath(clang)
+            << " --target=riscv32-unknown-elf -march=rv32im -mabi=ilp32 -x ir -S "
+            << (optimize ? "-O2" : "-O0")
+            << " -o " << quotePath(temp.assembly)
+            << ' ' << quotePath(temp.ir)
+            << " 2> " << quotePath(temp.errors);
+#endif
 
     const int status = std::system(command.str().c_str());
     if (status != 0) {

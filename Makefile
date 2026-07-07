@@ -1,7 +1,13 @@
 CXX ?= g++
 CXXFLAGS ?= -std=c++20 -O2 -pipe -Wall -Wextra -Isrc
 
-TARGET := compiler.exe
+ifeq ($(OS),Windows_NT)
+EXEEXT ?= .exe
+else
+EXEEXT ?=
+endif
+
+TARGET := compiler$(EXEEXT)
 SOURCES := \
 	src/main.cpp \
 	src/lexer.cpp \
